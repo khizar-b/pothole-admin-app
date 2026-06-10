@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Pothole Management</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🛣️ Pothole Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#upload" class="nav-item active" data-section="upload">
+                    <span class="icon">📤</span>
+                    Upload CSV
+                </a>
+                <a href="#records" class="nav-item" data-section="records">
+                    <span class="icon">📊</span>
+                    View Records
+                </a>
+                <a href="#stats" class="nav-item" data-section="stats">
+                    <span class="icon">📈</span>
+                    Statistics
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <span class="icon">👤</span>
+                    <span id="username"></span>
+                </div>
+                <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1 id="pageTitle">Upload CSV File</h1>
+            </header>
+            
+            <!-- Upload Section -->
+            <section id="uploadSection" class="content-section active">
+                <div class="upload-card">
+                    <div class="upload-instructions">
+                        <h3>CSV File Requirements</h3>
+                        <p>Your CSV file must contain the following columns:</p>
+                        <ul>
+                            <li><strong>image_name</strong> - Name of the pothole image</li>
+                            <li><strong>timestamp</strong> - Date and time of detection</li>
+                            <li><strong>bbox_x, bbox_y, bbox_width, bbox_height</strong> - Bounding box coordinates</li>
+                            <li><strong>confidence_score</strong> - Detection confidence</li>
+                            <li><strong>latitude, longitude</strong> - GPS coordinates</li>
+                        </ul>
+                        <p style="margin-top: 12px; color: #4a5568;"><strong>Note:</strong> Impact scores for bikes and cars are calculated automatically.</p>
+                    </div>
+                    
+                    <form id="uploadForm" class="upload-form">
+                        <div class="file-input-wrapper">
+                            <input 
+                                type="file" 
+                                id="csvFile" 
+                                name="file" 
+                                accept=".csv" 
+                                required
+                            >
+                            <label for="csvFile" class="file-input-label">
+                                <span class="icon">📁</span>
+                                <span id="fileName">Choose CSV file</span>
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" id="uploadBtn">
+                            Upload File
+                        </button>
+                    </form>
+                    
+                    <div id="uploadProgress" class="upload-progress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <p class="progress-text">Uploading...</p>
+                    </div>
+                    
+                    <div id="uploadResult" class="result-message" style="display: none;"></div>
+                </div>
+            </section>
+            
+            <!-- Records Section -->
+            <section id="recordsSection" class="content-section">
+                <div class="records-controls">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search by image name..."
+                        class="search-input"
+                    >
+                    <button id="refreshBtn" class="btn btn-secondary">
+                        🔄 Refresh
+                    </button>
+                    <button id="deleteDuplicatesBtn" class="btn btn-warning">
+                        🗑️ Delete Duplicates
+                    </button>
+                    <button id="exportBtn" class="btn btn-secondary">
+                        📥 Export with Impact Scores
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Image Name</th>
+                                <th>Timestamp</th>
+                                <th>Confidence</th>
+                                <th>Impact Score</th>
+                                <th>Bike Impact</th>
+                                <th>Car Impact</th>
+                                <th>GPS Location</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordsTableBody">
+                            <tr>
+                                <td colspan="9" class="no-data">Loading records...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination" id="pagination"></div>
+            </section>
+            
+            <!-- Statistics Section -->
+            <section id="statsSection" class="content-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Records</h3>
+                        <p class="stat-value" id="totalRecords">0</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h3>Average Confidence</h3>
+                        <p class="stat-value" id="avgConfidence">0%</p>
+                    </div>
+                </div>
+                
+                <div class="stats-advanced">
+                    <!-- Impact Score Distribution -->
+                    <div class="chart-section">
+                        <h3>📊 Impact Score Distribution</h3>
+                        <div class="impact-distribution">
+                            <div class="impact-stat high">
+                                <div class="impact-stat-label">High Impact (61-100)</div>
+                                <div class="impact-stat-value" id="highImpactCount">0</div>
+                            </div>
+                            <div class="impact-stat medium">
+                                <div class="impact-stat-label">Medium Impact (31-60)</div>
+                                <div class="impact-stat-value" id="mediumImpactCount">0</div>
+                            </div>
+                            <div class="impact-stat low">
+                                <div class="impact-stat-label">Low Impact (0-30)</div>
+                                <div class="impact-stat-value" id="lowImpactCount">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bike Impact Distribution -->
+                    <div class="chart-section">
+                        <h3>🚴 Bike Impact Distribution</h3>
+                        <div class="impact-distribution">
+                            <div class="impact-stat high">
+                                <div class="impact-stat-label">High</div>
+                                <div class="impact-stat-value" id="bikeHighCount">0</div>
+                            </div>
+                            <div class="impact-stat medium">
+                                <div class="impact-stat-label">Medium</div>
+                                <div class="impact-stat-value" id="bikeMediumCount">0</div>
+                            </div>
+                            <div class="impact-stat low">
+                                <div class="impact-stat-label">Low</div>
+                                <div class="impact-stat-value" id="bikeLowCount">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Car Impact Distribution -->
+                    <div class="chart-section">
+                        <h3>🚗 Car Impact Distribution</h3>
+                        <div class="impact-distribution">
+                            <div class="impact-stat high">
+                                <div class="impact-stat-label">High</div>
+                                <div class="impact-stat-value" id="carHighCount">0</div>
+                            </div>
+                            <div class="impact-stat medium">
+                                <div class="impact-stat-label">Medium</div>
+                                <div class="impact-stat-value" id="carMediumCount">0</div>
+                            </div>
+                            <div class="impact-stat low">
+                                <div class="impact-stat-label">Low</div>
+                                <div class="impact-stat-value" id="carLowCount">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Impact Potholes -->
+                    <div class="chart-section">
+                        <h3>⚠️ Top 5 Highest Impact Potholes</h3>
+                        <table class="records-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Image</th>
+                                    <th>Impact Score</th>
+                                    <th>Confidence</th>
+                                    <th>Bike</th>
+                                    <th>Car</th>
+                                    <th>Coordinates</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topPotholesBody">
+                                <tr>
+                                    <td colspan="6" class="no-data">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

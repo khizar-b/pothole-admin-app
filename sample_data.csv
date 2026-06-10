@@ -1,0 +1,6 @@
+image_name,timestamp,bbox_x,bbox_y,bbox_width,bbox_height,confidence_score,damage_type,latitude,longitude
+pothole_001.jpg,2025-12-19 10:30:00,120,150,80,60,0.95,Crack,40.7128,-74.0060
+pothole_002.jpg,2025-12-19 11:15:00,200,180,100,75,0.87,Deep Pothole,40.7589,-73.9851
+pothole_003.jpg,2025-12-19 12:00:00,50,90,60,50,0.92,Surface Damage,40.7306,-73.9352
+pothole_004.jpg,2025-12-19 13:45:00,300,220,110,85,0.88,Crack,40.7580,-73.9855
+pothole_005.jpg,2025-12-19 14:30:00,150,130,70,55,0.91,Deep Pothole,40.7489,-73.9680
