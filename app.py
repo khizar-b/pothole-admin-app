@@ -27,10 +27,12 @@ def create_app():
     from routes.auth import auth_bp
     from routes.upload import upload_bp
     from routes.pages import pages_bp
-    
+    from routes.mobile import mobile_bp
+
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(upload_bp, url_prefix='/api')
     app.register_blueprint(pages_bp)
+    app.register_blueprint(mobile_bp, url_prefix='/api')
 
     # Lightweight health check endpoint
     @app.route('/health')
